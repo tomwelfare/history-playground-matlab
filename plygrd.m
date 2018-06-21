@@ -27,7 +27,7 @@ if ok
     data = plygrdQuery(queries,datasets,authToken);
     plygrdPlot(data);
 else
-    clear ok data datasets queries;
+    clear ok datasets queries;
     return;
 end
 
@@ -76,8 +76,7 @@ function ok = checkDatasets(datasets)
     ok = 1;
     acceptable = {'bna', 'caa'};
     for i = 1 : length(datasets)
-        strcmp(acceptable,datasets{i})
-        accept(i) = sum(strcmp(acceptable,datasets{i}))
+        accept(i) = sum(strcmp(acceptable,datasets{i}));
     end
     if sum(accept) < size(datasets,2)
         disp('Invalid dataset selected');
