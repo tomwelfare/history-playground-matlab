@@ -31,7 +31,7 @@ else
     return;
 end
 
-clear ans;
+clear ok ans queries datasets;
 
 return;
 
