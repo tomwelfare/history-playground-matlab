@@ -15,6 +15,28 @@ disp('Welcome to the History Playground.');
 
 % Request login details if they haven't logged in already
 if ~exist('authToken','var')
+    authToken = requestLogin();
+end
+
+%Request query and dataset options
+queries = getQueries();
+datasets = getDatasets();
+
+ok = checkDatasets(datasets);
+if ok
+    data = plygrdQuery(queries,datasets,authToken);
+    plygrdPlot(data);
+else
+    clear ok data datasets queries;
+    return;
+end
+
+clear ans;
+
+return;
+
+
+function authToken = requestLogin()
     title = 'Login to History Playground';
     prompt = {'Please enter your email address:',...
         'Please enter your password:'};
@@ -29,46 +51,36 @@ if ~exist('authToken','var')
     disp('Thank you, you have successfully logged in!');
 end
 
-%Request query and dataset options
-prompt = 'Please enter your query terms (comma-separated): ';
-queryStr = input(prompt,'s');
-if isempty(queryStr)
-    disp('No queries specified!');
-    clear queryStr prompt;
-    return
-end
-queries = strsplit(queryStr,{', ',','});
-clear queryStr;
-
-prompt = 'Please enter your chosen datasets [bna, caa] (comma-separated): ';
-datasetStr = input(prompt,'s');
-if isempty(datasetStr)
-    disp('No datasets specified!');
-    clear datasetStr prompt;
-    return
+function queries = getQueries()
+    prompt = 'Please enter your query terms (comma-separated): ';
+    queryStr = input(prompt,'s');
+    if isempty(queryStr)
+        disp('No queries specified!');
+        return
+    end
+    queries = strsplit(queryStr,{', ',','});
 end
 
-datasets = strsplit(datasetStr,{', ',','});
-clear datasetStr;
+function datasets = getDatasets()
+    prompt = 'Please enter your chosen datasets [bna, caa] (comma-separated): ';
+    datasetStr = input(prompt,'s');
+    if isempty(datasetStr)
+        disp('No datasets specified!');
+        return
+    end
 
-%Check corpora exist!
-acceptable = {'bna', 'caa'};
-accept = strcmp(datasets,acceptable);
-clear acceptable;
-if sum(accept) < size(datasets,2)
-    disp('Invalid dataset selected');
-    clear accept;
-    return;
+    datasets = strsplit(datasetStr,{', ',','});
 end
 
-data = plygrdQuery(queries,datasets,authToken);
-
-clear title prompt datasetStr queryStr acceptable accept queries datasets;
-
-% Plot the results
-fprintf('Generating plot...');
-plygrdPlot(data);
-fprintf('Finished\n');
-clear ans;
-
-return;
+function ok = checkDatasets(datasets)
+    ok = 1;
+    acceptable = {'bna', 'caa'};
+    for i = 1 : length(datasets)
+        strcmp(acceptable,datasets{i})
+        accept(i) = sum(strcmp(acceptable,datasets{i}))
+    end
+    if sum(accept) < size(datasets,2)
+        disp('Invalid dataset selected');
+        ok = 0;
+    end 
+end

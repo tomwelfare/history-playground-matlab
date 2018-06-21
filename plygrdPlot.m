@@ -13,37 +13,59 @@ function [series dates] = plygrdPlot(response)
 %       plygrdPlot(response);
 %
 %    See also PLYGRD, PLYGRDLOGIN, PLYGRDQUERY
+
     numSeries = size(response,1);
-    y = '';
-    figure;
-    hold on;
-    for i = 1 : numSeries
-        if isfield(response(i), 'counts')
-           data = response(i).counts;
-           y = 'Relative Frequency';
-        else
-           data = response(i).rank;
-           y = 'Word Rank Score';
-        end
+    
+    figure; hold on;
+    for i = 1 : numSeries % Each query
+        data = chooseDisplay(response(i));      
         years = fieldnames(data);
         series(i,:) = zeros(size(years,1),1);
-        for j = 1:size(years,1)
+        
+        for j = 1:size(years,1) % Each value
             field = years(j);
             dates(j) = datetime(extractAfter(field{1},'x'),'InputFormat','y');
-            if ~isempty(eval(['data.' field{1}]))
-                series(i,j) = eval(['data.' field{1}]);
-            else
-                series(i,j) = NaN;
-            end
+            series(i,j) = getValue(data,field); 
         end
 
         plot(dates,series(i,:),'LineWidth',1);
-        ylabel(y);
-        xlabel('Year');    
-        labels{i} = [response(i).term ' (' response(i).corpus ')'];
+    end
+    
+    setFigureDetails(response);
+    hold off;
+end
+
+function data = chooseDisplay(response)
+    if isfield(response, 'counts')
+           data = response.counts;
+    else
+           data = response.rank;
+    end
+end
+
+function value = getValue(data, field) 
+    if ~isempty(eval(['data.' field{1}]))
+        value = eval(['data.' field{1}]);
+    else
+        value = NaN;
+    end
+end
+
+function setFigureDetails(response)
+    % Set y label
+    if isfield(response(1), 'counts'); ylabel('Relative Frequency');
+    else; ylabel('Word Rank Score'); end
+    
+    % Set x label
+    xlabel('Year');
+    
+    % Set legend details
+    for i = 1 : size(response,1)
+       labels{i} = [response(i).term ' (' response(i).corpus ')']; 
     end
     legend(labels,'Location', 'Best');
+    
+    % Turn on box
     box on;
-    hold off;
 end
 
