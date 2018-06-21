@@ -15,7 +15,12 @@ disp('Welcome to the History Playground.');
 
 % Request login details if they haven't logged in already
 if ~exist('authToken','var')
-    authToken = requestLogin();
+    try
+        authToken = requestLogin();
+    catch
+        fprintf('Email and/or password are incorrect.\n');
+        return
+    end
 end
 
 %Request query and dataset options
@@ -37,17 +42,13 @@ return;
 
 
 function authToken = requestLogin()
-    title = 'Login to History Playground';
-    prompt = {'Please enter your email address:',...
-        'Please enter your password:'};
-    answer = inputdlg(prompt,title);
-    clear title prompt;
-    if isempty(answer{1}) || isempty(answer{2})
-        clear answer;
+    [email password] = logindlg('Login to History Playground','Email');
+    if isempty(email) || isempty(password)
+        clear email password;
         return
     end
-    authToken = plygrdLogin(answer{1},answer{2});
-    clear answer;
+    authToken = plygrdLogin(email,password);
+    clear email password;
     disp('Thank you, you have successfully logged in!');
 end
 
